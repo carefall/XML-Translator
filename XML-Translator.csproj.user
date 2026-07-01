@@ -4,6 +4,9 @@
     <_LastSelectedProfileId>C:\Users\caref\source\repos\XML-Translator\Properties\PublishProfiles\FolderProfile.pubxml</_LastSelectedProfileId>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Update="TextEditWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="XMLWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>

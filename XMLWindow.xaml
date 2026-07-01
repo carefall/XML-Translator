@@ -54,6 +54,10 @@
                 </Style>
             </DataGrid.RowStyle>
             <DataGrid.Columns>
+                <DataGridTextColumn Header="ID"
+                    Binding="{Binding Id}"
+                    IsReadOnly="True"
+                    Width="220"/>
                 <DataGridTemplateColumn Header="Русский" Width="2*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
@@ -79,14 +83,25 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="Новый перевод" Width="2*">
+                <DataGridTemplateColumn Header="Новый русский" Width="2*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBox Text="{Binding NewRuText, UpdateSourceTrigger=PropertyChanged}"
+                                IsReadOnly="{Binding IsApproved}"
+                                BorderThickness="0"
+                                MouseDoubleClick="EditLongText"
+                                Background="Transparent"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="Новый английский" Width="2*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBox Text="{Binding NewEngText, UpdateSourceTrigger=PropertyChanged}"
-                             IsReadOnly="{Binding IsApproved}"
-                             BorderThickness="0"
-                             PreviewMouseLeftButtonDown="TranslationBox_PreviewMouseLeftButtonDown"
-                             Background="Transparent"/>
+                                IsReadOnly="{Binding IsApproved}"
+                                BorderThickness="0"
+                                MouseDoubleClick="EditLongText"
+                                Background="Transparent"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>

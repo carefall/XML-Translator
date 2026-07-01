@@ -23,22 +23,49 @@ namespace XML_Translator
             {
                 XDocument doc = XDocument.Load(_filePath);
                 var entries = (List<StringEntry>)DataContext;
+
                 foreach (var entry in entries)
                 {
-                    if (!entry.IsApproved) continue;
-                    if (entry.EngText == entry.NewEngText)
+                    if (!entry.IsApproved)
+                        continue;
+
+                    if (!entry.HasChanges)
                     {
                         entry.IsApproved = false;
                         continue;
                     }
-                    var node = doc.Root!.Elements("string").FirstOrDefault(x => (string?)x.Attribute("id") == entry.Id);
-                    if (node == null) continue;
-                    var eng = node.Element("eng");
-                    if (eng == null) node.Add(new XElement("eng", entry.NewEngText));
-                    else eng.Value = entry.NewEngText!;
-                    entry.EngText = entry.NewEngText;
+
+                    var node = doc.Root!.Elements("string")
+                        .FirstOrDefault(x => (string?)x.Attribute("id") == entry.Id);
+
+                    if (node == null)
+                        continue;
+
+                    if (entry.HasEngChanges)
+                    {
+                        var eng = node.Element("eng");
+                        if (eng == null)
+                            node.Add(new XElement("eng", entry.NewEngText));
+                        else
+                            eng.Value = entry.NewEngText!;
+
+                        entry.EngText = entry.NewEngText;
+                    }
+
+                    if (entry.HasRuChanges)
+                    {
+                        var rus = node.Element("rus");
+                        if (rus == null)
+                            node.Add(new XElement("rus", entry.NewRuText));
+                        else
+                            rus.Value = entry.NewRuText!;
+
+                        entry.RuText = entry.NewRuText;
+                    }
+
                     entry.IsApproved = false;
                 }
+
                 doc.Save(_filePath);
                 MessageBox.Show("Файл сохранён", "XML Translator");
             }
@@ -87,13 +114,29 @@ namespace XML_Translator
             }
         }
 
-        private void TranslationBox_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void EditLongText(object sender, MouseButtonEventArgs e)
         {
-            if (sender is TextBox tb)
+            if (sender is not TextBox tb)
+                return;
+            if (tb.IsReadOnly)
+                return;
+            var title = tb.DataContext is StringEntry entry &&
+            tb.GetBindingExpression(TextBox.TextProperty)?.ParentBinding.Path.Path == nameof(StringEntry.NewRuText)
+    ? "Редактирование русского текста"
+    : "Редактирование английского перевода";
+
+            var dlg = new TextEditWindow(tb.Text)
             {
-                tb.Focus();
-                e.Handled = true;
+                Owner = this,
+                Title = title
+            };
+
+            if (dlg.ShowDialog() == true)
+            {
+                tb.Text = dlg.ResultText;
             }
+
+            e.Handled = true;
         }
     }
 }

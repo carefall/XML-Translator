@@ -9,6 +9,18 @@ public class StringEntry : INotifyPropertyChanged
 
     private string? _newEngText;
     private string? _engText;
+    private string? _newRuText;
+
+    public string? NewRuText
+    {
+        get => _newRuText;
+        set
+        {
+            _newRuText = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(HasChanges));
+        }
+    }
 
     public string? Id { get; set; }
     public string? RuText { get; set; }
@@ -48,7 +60,9 @@ public class StringEntry : INotifyPropertyChanged
         }
     }
 
-    public bool HasChanges => EngText != NewEngText;
+    public bool HasEngChanges => EngText != NewEngText;
+    public bool HasRuChanges => RuText != NewRuText;
+    public bool HasChanges => HasEngChanges || HasRuChanges;
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -66,9 +80,10 @@ public class StringEntry : INotifyPropertyChanged
                 {
                     Id = x.Attribute("id")?.Value ?? "",
                     RuText = x.Element("rus")?.Value ?? "",
+                    NewRuText = x.Element("rus")?.Value ?? "",
                     EngText = x.Element("eng")?.Value ?? "",
                     NewEngText = x.Element("eng")?.Value ?? ""
-                }
+            }
             ).ToList();
         }
         catch (Exception ex)
