@@ -1,6 +1,7 @@
 ﻿using Microsoft.Win32;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Xml.Linq;
 
 namespace XML_Translator
@@ -67,7 +68,32 @@ namespace XML_Translator
 
         private void Approve_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button btn && btn.DataContext is StringEntry entry) entry.IsApproved = !entry.IsApproved; 
+            if (sender is not Button btn || btn.DataContext is not StringEntry clicked)
+                return;
+
+            var selected = Grid.SelectedItems.Cast<StringEntry>().ToList();
+            if (!selected.Contains(clicked))
+                selected = new List<StringEntry> { clicked };
+
+            if (clicked.IsApproved)
+            {
+                foreach (var item in selected.Where(x => x.IsApproved))
+                    item.IsApproved = false;
+            }
+            else
+            {
+                foreach (var item in selected.Where(x => x.HasChanges && !x.IsApproved))
+                    item.IsApproved = true;
+            }
+        }
+
+        private void TranslationBox_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is TextBox tb)
+            {
+                tb.Focus();
+                e.Handled = true;
+            }
         }
     }
 }

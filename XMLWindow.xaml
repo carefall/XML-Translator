@@ -11,24 +11,34 @@
     <Window.Resources>
         <local:InverseBooleanConverter x:Key="InverseBool"/>
     </Window.Resources>
-    <StackPanel>
-        <Button Content="Сохранить в файл"
-            Width="150"
-            Height="30"
-            Margin="5"
-            Click="Save_Click"/>
-        <Button Content="Загрузить перевод из файла"
-            Width="200"
-            Height="30"
-            Margin="5"
-            Click="LoadTranslation_Click"/>
-        <DataGrid x:Name="Grid"
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Orientation="Horizontal">
+            <Button Content="Сохранить в файл"
+                Width="150"
+                Height="30"
+                Margin="5"
+                Click="Save_Click"/>
+            <Button Content="Загрузить перевод из файла"
+                Width="200"
+                Height="30"
+                Margin="5"
+                Click="LoadTranslation_Click"/>
+        </StackPanel>
+        <DataGrid x:Name="Grid" Grid.Row="1"
                   ItemsSource="{Binding}"
                   AutoGenerateColumns="False"
-                  CanUserAddRows="False">
+                  CanUserAddRows="False"
+                  SelectionMode="Extended"
+                  SelectionUnit="FullRow">
             <DataGrid.Resources>
-                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent"/>
+                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="LightBlue"/>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="Black"/>
+                <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="LightBlue"/>
+                <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="Black"/>
             </DataGrid.Resources>
             <DataGrid.RowStyle>
                 <Style TargetType="DataGridRow">
@@ -44,20 +54,38 @@
                 </Style>
             </DataGrid.RowStyle>
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Русский"
-                            Binding="{Binding RuText}"
-                            IsReadOnly="True"
-                            Width="2*" />
-                <DataGridTextColumn Header="English"
-                            Binding="{Binding EngText}"
-                            IsReadOnly="True"
-                            Width="2*" />
+                <DataGridTemplateColumn Header="Русский" Width="2*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBox Text="{Binding RuText}"
+                     IsReadOnly="True"
+                     BorderThickness="0"
+                     Background="Transparent"
+                     TextWrapping="Wrap"
+                     Cursor="IBeam"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTemplateColumn Header="English" Width="2*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBox Text="{Binding EngText}"
+                     IsReadOnly="True"
+                     BorderThickness="0"
+                     Background="Transparent"
+                     TextWrapping="Wrap"
+                     Cursor="IBeam"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
                 <DataGridTemplateColumn Header="Новый перевод" Width="2*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBox Text="{Binding NewEngText, UpdateSourceTrigger=PropertyChanged}"
                              IsReadOnly="{Binding IsApproved}"
                              BorderThickness="0"
+                             PreviewMouseLeftButtonDown="TranslationBox_PreviewMouseLeftButtonDown"
                              Background="Transparent"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
@@ -84,5 +112,5 @@
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
-    </StackPanel>
+    </Grid  >
 </Window>
