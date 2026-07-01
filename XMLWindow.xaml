@@ -1,0 +1,88 @@
+﻿<Window x:Class="XML_Translator.XMLWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:XML_Translator"
+        mc:Ignorable="d"
+        Title="XML Translator"
+        Height="720" Width="1280"
+        WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        <local:InverseBooleanConverter x:Key="InverseBool"/>
+    </Window.Resources>
+    <StackPanel>
+        <Button Content="Сохранить в файл"
+            Width="150"
+            Height="30"
+            Margin="5"
+            Click="Save_Click"/>
+        <Button Content="Загрузить перевод из файла"
+            Width="200"
+            Height="30"
+            Margin="5"
+            Click="LoadTranslation_Click"/>
+        <DataGrid x:Name="Grid"
+                  ItemsSource="{Binding}"
+                  AutoGenerateColumns="False"
+                  CanUserAddRows="False">
+            <DataGrid.Resources>
+                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent"/>
+                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="Black"/>
+            </DataGrid.Resources>
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow">
+                    <Setter Property="Background" Value="White"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding HasChanges}" Value="True">
+                            <Setter Property="Background" Value="Yellow"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding IsApproved}" Value="True">
+                            <Setter Property="Background" Value="LightGreen"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.RowStyle>
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Русский"
+                            Binding="{Binding RuText}"
+                            IsReadOnly="True"
+                            Width="2*" />
+                <DataGridTextColumn Header="English"
+                            Binding="{Binding EngText}"
+                            IsReadOnly="True"
+                            Width="2*" />
+                <DataGridTemplateColumn Header="Новый перевод" Width="2*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBox Text="{Binding NewEngText, UpdateSourceTrigger=PropertyChanged}"
+                             IsReadOnly="{Binding IsApproved}"
+                             BorderThickness="0"
+                             Background="Transparent"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Width="110">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Click="Approve_Click">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Content" Value="✔ Утвердить"/>
+                                        <Setter Property="ToolTip" Value="Утвердить перевод"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsApproved}" Value="True">
+                                                <Setter Property="Content" Value="✖ Снять"/>
+                                                <Setter Property="ToolTip" Value="Снять утверждение"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </StackPanel>
+</Window>
