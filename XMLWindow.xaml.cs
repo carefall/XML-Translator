@@ -80,6 +80,13 @@ namespace XML_Translator
             }
         }
 
+        private void Return_Click(object sender, RoutedEventArgs e)
+        {
+            MainWindow window = new MainWindow();
+            window.Show();
+            Close();
+        }
+
         private void LoadTranslation_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog dialog = new()
