@@ -77,19 +77,29 @@ public class StringEntry : INotifyPropertyChanged
         {
             XDocument doc = XDocument.Load(fileName);
             return doc.Root!.Elements("string").Select(x => new StringEntry
-                {
-                    Id = x.Attribute("id")?.Value ?? "",
-                    RuText = x.Element("rus")?.Value ?? "",
-                    NewRuText = x.Element("rus")?.Value ?? "",
-                    EngText = x.Element("eng")?.Value ?? "",
-                    NewEngText = x.Element("eng")?.Value ?? ""
-            }
-            ).ToList();
+            {
+                Id = x.Attribute("id")?.Value ?? "",
+                RuText = DecodeMultiline(x.Element("rus")?.Value ?? ""),
+                NewRuText = DecodeMultiline(x.Element("rus")?.Value ?? ""),
+                EngText = DecodeMultiline(x.Element("eng")?.Value ?? ""),
+                NewEngText = DecodeMultiline(x.Element("eng")?.Value ?? ""),
+            }).ToList();
         }
         catch (Exception ex)
         {
             MessageBox.Show(ex.Message, "Ошибка загрузки XML");
             return new List<StringEntry>();
         }
+    }
+
+    public static string DecodeMultiline(string text)
+    {
+        return text.Replace("\\n", Environment.NewLine);
+    }
+
+    public static string EncodeMultiline(string text)
+    {
+        return text.Replace("\r\n", "\\n")
+                   .Replace("\n", "\\n");
     }
 }

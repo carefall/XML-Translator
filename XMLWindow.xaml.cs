@@ -41,26 +41,31 @@ namespace XML_Translator
                     if (node == null)
                         continue;
 
-                    if (entry.HasEngChanges)
-                    {
-                        var eng = node.Element("eng");
-                        if (eng == null)
-                            node.Add(new XElement("eng", entry.NewEngText));
-                        else
-                            eng.Value = entry.NewEngText!;
-
-                        entry.EngText = entry.NewEngText;
-                    }
-
                     if (entry.HasRuChanges)
                     {
                         var rus = node.Element("rus");
+
+                        string text = StringEntry.EncodeMultiline(entry.NewRuText ?? "");
+
                         if (rus == null)
-                            node.Add(new XElement("rus", entry.NewRuText));
+                            node.Add(new XElement("rus", text));
                         else
-                            rus.Value = entry.NewRuText!;
+                            rus.Value = text;
 
                         entry.RuText = entry.NewRuText;
+                    }
+
+
+                    if (entry.HasEngChanges)
+                    {
+                        var eng = node.Element("eng");
+                        string text = StringEntry.EncodeMultiline(entry.NewEngText ?? "");
+                        if (eng == null)
+                            node.Add(new XElement("eng", text));
+                        else
+                            eng.Value = text;
+
+                        entry.EngText = entry.NewEngText;
                     }
 
                     entry.IsApproved = false;
