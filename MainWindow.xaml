@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:XML_Translator"
         mc:Ignorable="d"
         Title="XML-Translator"
-        Height="720" Width="1280"
+        Height="300" Width="400"
         WindowStartupLocation="CenterScreen"
         AllowDrop="True"
         Drop="Window_Drop"
@@ -25,7 +25,7 @@
             <Button Width="150"
                     Height="35"
                     HorizontalAlignment="Center"
-                    Content="Выбрать файл"
+                    Content="Выберите файл"
                     Click="OpenFile_Click"
                     FontFamily="Segoe UI, Noto Sans, Arial, Times New Roman"/>
         </StackPanel>

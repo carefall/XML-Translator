@@ -36,13 +36,31 @@
                 Margin="5"
                 Click="Return_Click"
                  FontFamily="Segoe UI, Noto Sans, Arial, Times New Roman"/>
+            <CheckBox Content="Скрыть утверждённые"
+                  Margin="10,0"
+                  Checked="FilterChanged"
+                  Unchecked="FilterChanged"/>
+            <CheckBox Content="Скрыть неизменённые"
+                  Margin="10,0"
+                  Checked="FilterChanged"
+                  Unchecked="FilterChanged"/>
+            <CheckBox Content="Скрыть изменённые"
+                  Margin="10,0"
+                  Checked="FilterChanged"
+                  Unchecked="FilterChanged"/>   
+            <TextBox x:Name="SearchBox"
+                Height="30"
+                Width="300"
+                TextChanged="SearchBox_TextChanged"
+                VerticalContentAlignment="Center"/>
         </StackPanel>
         <DataGrid x:Name="Grid" Grid.Row="1"
                   ItemsSource="{Binding}"
                   AutoGenerateColumns="False"
                   CanUserAddRows="False"
                   SelectionMode="Extended"
-                  SelectionUnit="FullRow">
+                  SelectionUnit="FullRow"
+                  CanUserSortColumns="True">
             <DataGrid.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="LightBlue"/>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="Black"/>
@@ -67,7 +85,7 @@
                     Binding="{Binding Id}"
                     IsReadOnly="True"
                     Width="220"/>
-                <DataGridTemplateColumn Header="Русский" Width="2*">
+                <DataGridTemplateColumn Header="Русский" Width="2*" SortMemberPath="RuText">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBox Text="{Binding RuText}"
@@ -80,7 +98,7 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="English" Width="2*">
+                <DataGridTemplateColumn Header="English" Width="2*" SortMemberPath="EngText">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBox Text="{Binding EngText}"
@@ -93,7 +111,7 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="Новый русский" Width="2*">
+                <DataGridTemplateColumn Header="Новый русский" Width="2*" SortMemberPath="NewRuText">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBox Text="{Binding NewRuText, UpdateSourceTrigger=PropertyChanged}"
@@ -105,7 +123,7 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="Новый английский" Width="2*">
+                <DataGridTemplateColumn Header="Новый английский" Width="2*" SortMemberPath="NewEngText">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBox Text="{Binding NewEngText, UpdateSourceTrigger=PropertyChanged}"
@@ -139,5 +157,5 @@
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
-    </Grid  >
+    </Grid>
 </Window>

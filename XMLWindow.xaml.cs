@@ -1,7 +1,9 @@
 ﻿using Microsoft.Win32;
+using System.ComponentModel;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Xml;
 using System.Xml.Linq;
@@ -11,12 +13,94 @@ namespace XML_Translator
     public partial class XMLWindow : Window
     {
         private readonly string _filePath;
+        private ICollectionView _view;
+        private string _searchText = "";
+        private bool _hideApproved;
+        private bool _hideUnchanged;
+        private bool _hideChanged;
 
         public XMLWindow(string filePath)
         {
             InitializeComponent();
             _filePath = filePath;
             DataContext = StringEntry.LoadStrings(filePath);
+            _view = CollectionViewSource.GetDefaultView(DataContext);
+            _view.Filter = FilterItems;
+            PreviewKeyDown += Window_PreviewKeyDown;
+        }
+
+        private bool FilterItems(object obj)
+        {
+            if (obj is not StringEntry item)
+                return false;
+
+           
+            if (!string.IsNullOrWhiteSpace(_searchText))
+            {
+                string s = _searchText.ToLowerInvariant();
+
+                bool match =
+                    (item.Id?.ToLowerInvariant().Contains(s) ?? false) ||
+                    (item.RuText?.ToLowerInvariant().Contains(s) ?? false) ||
+                    (item.EngText?.ToLowerInvariant().Contains(s) ?? false) ||
+                    (item.NewRuText?.ToLowerInvariant().Contains(s) ?? false) ||
+                    (item.NewEngText?.ToLowerInvariant().Contains(s) ?? false);
+
+                if (!match)
+                    return false;
+            }
+
+            
+            if (_hideApproved && item.IsApproved)
+                return false;
+
+            if (_hideUnchanged && !item.HasChanges)
+                return false;
+
+            
+            if (_hideChanged && item.HasChanges)
+                return false;
+
+            return true;
+        }
+
+        private void FilterChanged(object sender, RoutedEventArgs e)
+        {
+            if (sender is CheckBox cb)
+            {
+                switch (cb.Content.ToString())
+                {
+                    case "Скрыть утверждённые":
+                        _hideApproved = cb.IsChecked == true;
+                        break;
+
+                    case "Скрыть неизменённые":
+                        _hideUnchanged = cb.IsChecked == true;
+                        break;
+
+                    case "Скрыть изменённые":
+                        _hideChanged = cb.IsChecked == true;
+                        break;
+                }
+            }
+
+            _view?.Refresh();
+        }
+
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.F && Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                SearchBox.Focus();
+                SearchBox.SelectAll();
+                e.Handled = true;
+            }
+        }
+
+        private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            _searchText = SearchBox.Text;
+            _view?.Refresh();
         }
 
         private void Save_Click(object sender, RoutedEventArgs e)
