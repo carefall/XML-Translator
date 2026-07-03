@@ -7,7 +7,8 @@
         mc:Ignorable="d"
         Title="XML Translator"
         Height="720" Width="1280"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        FontFamily="Segoe UI, Noto Sans, Arial, Times New Roman">
     <Window.Resources>
         <local:InverseBooleanConverter x:Key="InverseBool"/>
     </Window.Resources>
@@ -21,17 +22,20 @@
                 Width="150"
                 Height="30"
                 Margin="5"
-                Click="Save_Click"/>
+                Click="Save_Click"
+                FontFamily="Segoe UI, Noto Sans, Arial, Times New Roman"/>
             <Button Content="Загрузить перевод из файла"
                 Width="200"
                 Height="30"
                 Margin="5"
-                Click="LoadTranslation_Click"/>
+                Click="LoadTranslation_Click"
+                FontFamily="Segoe UI, Noto Sans, Arial, Times New Roman"/>
             <Button Content="Вернуться на главную"
                 Width="200"
                 Height="30"
                 Margin="5"
-                Click="Return_Click"/> 
+                Click="Return_Click"
+                 FontFamily="Segoe UI, Noto Sans, Arial, Times New Roman"/>
         </StackPanel>
         <DataGrid x:Name="Grid" Grid.Row="1"
                   ItemsSource="{Binding}"
@@ -67,24 +71,25 @@
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBox Text="{Binding RuText}"
-                     IsReadOnly="True"
-                     BorderThickness="0"
-                     Background="Transparent"
-                     TextWrapping="Wrap"
-                     Cursor="IBeam"/>
+                                IsReadOnly="True"
+                                BorderThickness="0"
+                                Background="Transparent"
+                                TextWrapping="Wrap"
+                                Cursor="IBeam"
+                                FontFamily="Segoe UI, Noto Sans, Arial, Times New Roman"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-
                 <DataGridTemplateColumn Header="English" Width="2*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBox Text="{Binding EngText}"
-                     IsReadOnly="True"
-                     BorderThickness="0"
-                     Background="Transparent"
-                     TextWrapping="Wrap"
-                     Cursor="IBeam"/>
+                                IsReadOnly="True"
+                                BorderThickness="0"
+                                Background="Transparent"
+                                TextWrapping="Wrap"
+                                Cursor="IBeam"
+                                FontFamily="Segoe UI, Noto Sans, Arial, Times New Roman"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
@@ -95,7 +100,8 @@
                                 IsReadOnly="{Binding IsApproved}"
                                 BorderThickness="0"
                                 MouseDoubleClick="EditLongText"
-                                Background="Transparent"/>
+                                Background="Transparent"
+                                FontFamily="Segoe UI, Noto Sans, Arial, Times New Roman"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
@@ -106,14 +112,15 @@
                                 IsReadOnly="{Binding IsApproved}"
                                 BorderThickness="0"
                                 MouseDoubleClick="EditLongText"
-                                Background="Transparent"/>
+                                Background="Transparent"
+                                FontFamily="Segoe UI, Noto Sans, Arial, Times New Roman"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn Width="110">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <Button Click="Approve_Click">
+                            <Button Click="Approve_Click"  FontFamily="Segoe UI, Noto Sans, Arial, Times New Roman">
                                 <Button.Style>
                                     <Style TargetType="Button">
                                         <Setter Property="Content" Value="✔ Утвердить"/>

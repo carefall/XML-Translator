@@ -5,7 +5,8 @@
         Height="450"
         Width="700"
         WindowStartupLocation="CenterOwner"
-        ResizeMode="CanResize">
+        ResizeMode="CanResize"
+        FontFamily="Segoe UI, Noto Sans, Arial, Times New Roman">
 
     <Grid Margin="10">
         <Grid.RowDefinitions>
@@ -18,7 +19,8 @@
                  AcceptsTab="True"
                  TextWrapping="Wrap"
                  VerticalScrollBarVisibility="Auto"
-                 HorizontalScrollBarVisibility="Auto"/>
+                 HorizontalScrollBarVisibility="Auto"
+                 FontFamily="Segoe UI, Noto Sans, Arial, Times New Roman"/>
 
         <StackPanel Grid.Row="1"
                     Orientation="Horizontal"
@@ -27,16 +29,14 @@
             <Button Width="80"
                     Margin="5"
                     IsDefault="True"
-                    Click="Ok_Click">
-                OK
-            </Button>
-
+                    Click="Ok_Click"
+                    Content="OK"
+                    FontFamily="Segoe UI, Noto Sans, Arial, Times New Roman"/>
             <Button Width="80"
                     Margin="5"
-                    IsCancel="True">
-                Отмена
-            </Button>
+                    IsCancel="True"
+                    Content="Отмена"
+                    FontFamily="Segoe UI, Noto Sans, Arial, Times New Roman"/>
         </StackPanel>
     </Grid>
-
 </Window>

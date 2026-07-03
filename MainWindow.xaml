@@ -10,13 +10,15 @@
         WindowStartupLocation="CenterScreen"
         AllowDrop="True"
         Drop="Window_Drop"
-        DragOver="Window_DragOver">
+        DragOver="Window_DragOver"
+        FontFamily="Segoe UI, Noto Sans, Arial, Times New Roman">
     <Grid Margin="20">
         <StackPanel VerticalAlignment="Center">
             <TextBlock Text="Перетащите XML-файл сюда"
                        FontSize="18"
                        HorizontalAlignment="Center"
-                       Margin="0,0,0,20"/>
+                       Margin="0,0,0,20"
+                       FontFamily="Segoe UI, Noto Sans, Arial, Times New Roman"/>
             <TextBlock Text="или"
                        HorizontalAlignment="Center"
                        Margin="0,0,0,20"/>
@@ -24,7 +26,8 @@
                     Height="35"
                     HorizontalAlignment="Center"
                     Content="Выбрать файл"
-                    Click="OpenFile_Click"/>
+                    Click="OpenFile_Click"
+                    FontFamily="Segoe UI, Noto Sans, Arial, Times New Roman"/>
         </StackPanel>
     </Grid>
 </Window>

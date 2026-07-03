@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel;
+using System.IO;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Windows;
 using System.Xml.Linq;
 
@@ -64,6 +66,7 @@ public class StringEntry : INotifyPropertyChanged
     public bool HasRuChanges => RuText != NewRuText;
     public bool HasChanges => HasEngChanges || HasRuChanges;
 
+
     public event PropertyChangedEventHandler? PropertyChanged;
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
@@ -75,7 +78,8 @@ public class StringEntry : INotifyPropertyChanged
     {
         try
         {
-            XDocument doc = XDocument.Load(fileName);
+            using var reader = new StreamReader(fileName, Encoding.GetEncoding(1251));
+            XDocument doc = XDocument.Load(reader);
             return doc.Root!.Elements("string").Select(x => new StringEntry
             {
                 Id = x.Attribute("id")?.Value ?? "",

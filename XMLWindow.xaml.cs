@@ -1,7 +1,9 @@
 ﻿using Microsoft.Win32;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Xml;
 using System.Xml.Linq;
 
 namespace XML_Translator
@@ -44,9 +46,7 @@ namespace XML_Translator
                     if (entry.HasRuChanges)
                     {
                         var rus = node.Element("rus");
-
                         string text = StringEntry.EncodeMultiline(entry.NewRuText ?? "");
-
                         if (rus == null)
                             node.Add(new XElement("rus", text));
                         else
@@ -71,7 +71,14 @@ namespace XML_Translator
                     entry.IsApproved = false;
                 }
 
-                doc.Save(_filePath);
+                var settings = new XmlWriterSettings
+                {
+                    Encoding = Encoding.GetEncoding(1251),
+                    Indent = true
+                };
+
+                using var writer = XmlWriter.Create(_filePath, settings);
+                doc.Save(writer);
                 MessageBox.Show("Файл сохранён", "XML Translator");
             }
             catch (Exception ex)
@@ -82,7 +89,7 @@ namespace XML_Translator
 
         private void Return_Click(object sender, RoutedEventArgs e)
         {
-            MainWindow window = new MainWindow();
+            MainWindow window = new();
             window.Show();
             Close();
         }
