@@ -39,23 +39,23 @@
             <CheckBox Content="Скрыть утверждённые"
                   Margin="10,0"
                   Checked="FilterChanged"
-                  Unchecked="FilterChanged"/>
+                  Unchecked="FilterChanged" VerticalAlignment="Center"/>
             <CheckBox Content="Скрыть неизменённые"
                   Margin="10,0"
                   Checked="FilterChanged"
-                  Unchecked="FilterChanged"/>
+                  Unchecked="FilterChanged" VerticalAlignment="Center"/>
             <CheckBox Content="Скрыть изменённые"
                   Margin="10,0"
                   Checked="FilterChanged"
-                  Unchecked="FilterChanged"/>   
+                  Unchecked="FilterChanged" VerticalAlignment="Center"/>
             <TextBox x:Name="SearchBox"
                 Height="30"
-                Width="300"
+                Width="210"
                 TextChanged="SearchBox_TextChanged"
                 VerticalContentAlignment="Center"/>
         </StackPanel>
         <DataGrid x:Name="Grid" Grid.Row="1"
-                  ItemsSource="{Binding}"
+                  ItemsSource="{Binding }"
                   AutoGenerateColumns="False"
                   CanUserAddRows="False"
                   SelectionMode="Extended"
