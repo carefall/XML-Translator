@@ -1,10 +1,12 @@
 ﻿using Microsoft.Win32;
 using System.ComponentModel;
+using System.IO;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -12,21 +14,65 @@ namespace XML_Translator
 {
     public partial class XMLWindow : Window
     {
-        private readonly string _filePath;
-        private ICollectionView _view;
+        private readonly List<OpenFile> _openFiles = new();
+        private OpenFile? _currentFile;
+        private ICollectionView? _view;
+        private const double ScrollStep = 150;
+
         private string _searchText = "";
         private bool _hideApproved;
         private bool _hideUnchanged;
         private bool _hideChanged;
 
-        public XMLWindow(string filePath)
+        public class OpenFile
+        {
+            public string Path { get; }
+
+            public string Name => System.IO.Path.GetFileName(Path);
+
+            public List<StringEntry> Entries { get; }
+
+            public ICollectionView View { get; }
+
+            public OpenFile(string path)
+            {
+                Path = path;
+
+                Entries = StringEntry.LoadStrings(path);
+
+                View = CollectionViewSource.GetDefaultView(Entries);
+            }
+        }
+
+        public XMLWindow(string[] filePaths, bool folder)
         {
             InitializeComponent();
-            _filePath = filePath;
-            DataContext = StringEntry.LoadStrings(filePath);
-            _view = CollectionViewSource.GetDefaultView(DataContext);
-            _view.Filter = FilterItems;
+
+            if (folder)
+                filePaths = Directory.GetFiles(filePaths[0], "*", SearchOption.AllDirectories);
+
+            foreach (string path in filePaths)
+            {
+                var file = new OpenFile(path);
+                _openFiles.Add(file);
+                FilesList.Items.Add(file);
+            }
+
+            if (FilesList.Items.Count > 0)
+                FilesList.SelectedIndex = 0;
+
             PreviewKeyDown += Window_PreviewKeyDown;
+        }
+
+        private void SetCurrentFile(OpenFile file)
+        {
+            _currentFile = file;
+
+            DataContext = file.Entries;
+
+            _view = file.View;
+            _view.Filter = FilterItems;
+            _view.Refresh();
         }
 
         private bool FilterItems(object obj)
@@ -105,94 +151,155 @@ namespace XML_Translator
 
         private void Save_Click(object sender, RoutedEventArgs e)
         {
-            try
+            SaveFile();
+        }
+
+        private void SaveFile()
+        {
+            if (_currentFile == null)
+                return;
+            SaveFile( _currentFile );
+        }
+
+        private void SaveFile(OpenFile file)
+        {
+            if (file == null)
+                return;
+            XDocument doc = XDocument.Load(file.Path);
+            var entries = file.Entries;
+            foreach (var entry in entries)
             {
-                XDocument doc = XDocument.Load(_filePath);
-                var entries = (List<StringEntry>)DataContext;
+                if (!entry.IsApproved)
+                    continue;
 
-                foreach (var entry in entries)
+                if (!entry.HasChanges)
                 {
-                    if (!entry.IsApproved)
-                        continue;
-
-                    if (!entry.HasChanges)
-                    {
-                        entry.IsApproved = false;
-                        continue;
-                    }
-
-                    var node = doc.Root!.Elements("string")
-                        .FirstOrDefault(x => (string?)x.Attribute("id") == entry.Id);
-
-                    if (node == null)
-                        continue;
-
-                    if (entry.HasRuChanges)
-                    {
-                        var rus = node.Element("rus");
-                        string text = StringEntry.EncodeMultiline(entry.NewRuText ?? "");
-                        if (rus == null)
-                            node.Add(new XElement("rus", text));
-                        else
-                            rus.Value = text;
-
-                        entry.RuText = entry.NewRuText;
-                    }
-
-
-                    if (entry.HasEngChanges)
-                    {
-                        var eng = node.Element("eng");
-                        string text = StringEntry.EncodeMultiline(entry.NewEngText ?? "");
-                        if (eng == null)
-                            node.Add(new XElement("eng", text));
-                        else
-                            eng.Value = text;
-
-                        entry.EngText = entry.NewEngText;
-                    }
-
                     entry.IsApproved = false;
+                    continue;
                 }
 
-                var settings = new XmlWriterSettings
-                {
-                    Encoding = Encoding.GetEncoding(1251),
-                    Indent = true
-                };
+                var node = doc.Root!.Elements("string")
+                    .FirstOrDefault(x => (string?)x.Attribute("id") == entry.Id);
 
-                using var writer = XmlWriter.Create(_filePath, settings);
-                doc.Save(writer);
-                MessageBox.Show("Файл сохранён", "XML Translator");
+                if (node == null)
+                    continue;
+
+                if (entry.HasRuChanges)
+                {
+                    var rus = node.Element("rus");
+                    string text = StringEntry.EncodeMultiline(entry.NewRuText ?? "");
+                    if (rus == null)
+                        node.Add(new XElement("rus", text));
+                    else
+                        rus.Value = text;
+
+                    entry.RuText = entry.NewRuText;
+                }
+
+
+                if (entry.HasEngChanges)
+                {
+                    var eng = node.Element("eng");
+                    string text = StringEntry.EncodeMultiline(entry.NewEngText ?? "");
+                    if (eng == null)
+                        node.Add(new XElement("eng", text));
+                    else
+                        eng.Value = text;
+
+                    entry.EngText = entry.NewEngText;
+                }
+
+                entry.IsApproved = false;
             }
-            catch (Exception ex)
+
+            var settings = new XmlWriterSettings
             {
-                MessageBox.Show(ex.Message, "Ошибка сохранения");
+                Encoding = Encoding.GetEncoding(1251),
+                Indent = true
+            };
+
+            using var writer = XmlWriter.Create(file.Path, settings);
+            doc.Save(writer);
+            var result = MessageBox.Show("Файл сохранён. Желаете закрыть его?", "XML Translator", MessageBoxButton.YesNo);
+            if (result == MessageBoxResult.Yes)
+            {
+                if (_currentFile == null)
+                    return;
+
+                int index = FilesList.SelectedIndex;
+
+                _openFiles.Remove(_currentFile);
+                FilesList.Items.Remove(_currentFile);
+
+                if (FilesList.Items.Count == 0)
+                {
+                    Close();
+                    return;
+                }
+
+                FilesList.SelectedIndex = Math.Min(index, FilesList.Items.Count - 1);
             }
         }
 
-        private void Return_Click(object sender, RoutedEventArgs e)
+        private void LoadBufferTranslation_Click(object sender, RoutedEventArgs e)
         {
-            MainWindow window = new();
-            window.Show();
-            Close();
+            if (_currentFile == null)
+                return;
+
+            if (!Clipboard.ContainsText())
+            {
+                MessageBox.Show("Буфер обмена не содержит текста.");
+                return;
+            }
+
+            var translations = StringEntry
+                .LoadStringsFromXml(Clipboard.GetText())
+                .ToDictionary(x => x.Id!);
+
+            foreach (var item in _currentFile.Entries)
+            {
+                if (translations.TryGetValue(item.Id!, out var tr) &&
+                    !string.IsNullOrWhiteSpace(tr.EngText))
+                {
+                    item.NewEngText = tr.EngText;
+                }
+                if (translations.TryGetValue(item.Id, out var tr2) &&
+                    !string.IsNullOrWhiteSpace(tr2.RuText))
+                {
+                    item.NewRuText = tr2.RuText;
+                }
+            }
+
+            _view?.Refresh();
+
+            MessageBox.Show("Переводы загружены из буфера.", "XML Translator");
         }
 
         private void LoadTranslation_Click(object sender, RoutedEventArgs e)
         {
+            if (_currentFile == null)
+                return;
+
             OpenFileDialog dialog = new()
             {
                 Filter = "XML файлы (*.xml)|*.xml"
             };
+
             if (dialog.ShowDialog() != true)
                 return;
-            var secondFile = StringEntry.LoadStrings(dialog.FileName);
-            var current = (List<StringEntry>)DataContext;
-            foreach (var item in current)
+
+            var translations = StringEntry.LoadStrings(dialog.FileName).ToDictionary(x => x.Id!);
+            foreach (var item in _currentFile.Entries)
             {
-                var match = secondFile.FirstOrDefault(x => x.Id == item.Id);
-                if (match != null && !string.IsNullOrWhiteSpace(match.EngText)) item.NewEngText = match.EngText;
+                if (translations.TryGetValue(item.Id!, out var tr) &&
+                    !string.IsNullOrWhiteSpace(tr.EngText))
+                {
+                    item.NewEngText = tr.EngText;
+                }
             }
+
+            _view?.Refresh();
+
             MessageBox.Show("Переводы загружены", "XML Translator");
         }
 
@@ -241,5 +348,125 @@ namespace XML_Translator
 
             e.Handled = true;
         }
+
+        private void FilesList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (FilesList.SelectedItem is OpenFile file)
+                SetCurrentFile(file);
+        }
+
+        private static T? FindVisualChild<T>(DependencyObject parent)
+    where T : DependencyObject
+        {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+
+                if (child is T result)
+                    return result;
+
+                var nested = FindVisualChild<T>(child);
+                if (nested != null)
+                    return nested;
+            }
+
+            return null;
+        }
+
+        private void TabsLeft_Click(object sender, RoutedEventArgs e)
+        {
+            TabsScroll.ScrollToHorizontalOffset(
+                TabsScroll.HorizontalOffset - ScrollStep);
+        }
+
+        private void TabsRight_Click(object sender, RoutedEventArgs e)
+        {
+            TabsScroll.ScrollToHorizontalOffset(
+                TabsScroll.HorizontalOffset + ScrollStep);
+        }
+
+        private void FilesList_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            TabsScroll.ScrollToHorizontalOffset(
+                TabsScroll.HorizontalOffset - e.Delta);
+
+            e.Handled = true;
+        }
+
+        private void CloseFile(OpenFile file)
+        {
+            if (file == null)
+                return;
+
+            // есть ли утверждённые, но несохранённые изменения
+            bool hasUnsavedApprovedChanges = file.Entries
+                .Any(x => x.IsApproved && x.HasChanges);
+
+            if (hasUnsavedApprovedChanges)
+            {
+                var result = MessageBox.Show(
+                    "Есть несохранённые утверждённые изменения. Сохранить перед закрытием?",
+                    "XML Translator",
+                    MessageBoxButton.YesNoCancel,
+                    MessageBoxImage.Warning);
+
+                if (result == MessageBoxResult.Cancel)
+                    return;
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    SaveFile(file);
+                }
+            }
+
+            // удаляем из коллекций
+            _openFiles.Remove(file);
+            FilesList.Items.Remove(file);
+
+            // если закрыли текущий файл — переключаемся
+            if (_currentFile == file)
+            {
+                _currentFile = null;
+
+                if (_openFiles.Count > 0)
+                {
+                    var next = _openFiles.FirstOrDefault();
+                    if (next != null)
+                    {
+                        FilesList.SelectedItem = next;
+                    }
+                }
+                else
+                {
+                    DataContext = null;
+                }
+            }
+
+            // если ничего не осталось — закрываем окно
+            if (_openFiles.Count == 0)
+            {
+                Close();
+            }
+        }
+
+        private void CloseTab_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.Tag is OpenFile file)
+            {
+                CloseFile(file);
+            }
+        }
+
+        private void TabsScroll_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            var scroll = (ScrollViewer)sender;
+
+            double offset = scroll.HorizontalOffset - e.Delta * 0.5;
+            scroll.ScrollToHorizontalOffset(offset);
+
+            e.Handled = true;
+        }
+
+
     }
 }

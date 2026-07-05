@@ -15,46 +15,130 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <StackPanel Grid.Row="0" Orientation="Horizontal">
+
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="30"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="30"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="0"
+            Content="◀"
+            Click="TabsLeft_Click"/>
+
+            <ScrollViewer x:Name="TabsScroll"
+                  Grid.Column="1"
+                  HorizontalScrollBarVisibility="Hidden"
+                  VerticalScrollBarVisibility="Disabled"
+                          PreviewMouseWheel="TabsScroll_PreviewMouseWheel">
+                <ListBox x:Name="FilesList"
+         SelectionChanged="FilesList_SelectionChanged">
+
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Padding" Value="6,1"/>
+                            <Setter Property="Margin" Value="1,1,1,1"/>
+                            <Setter Property="BorderThickness" Value="1"/>
+                            <Setter Property="BorderBrush" Value="Gray"/>
+                            <Setter Property="Background" Value="LightGray"/>
+                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+
+                            <Style.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="White"/>
+                                    <Setter Property="FontWeight" Value="Bold"/>
+                                </Trigger>
+
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#FFE8E8E8"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+
+                    <!-- ❗ ВАЖНО: без ItemTemplate -->
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition Width="26"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Text="{Binding Name}"
+                           VerticalAlignment="Center"
+                                           
+                           Margin="6,0"/>
+                                <Button Grid.Column="1"
+                        Content="✕"
+                                        HorizontalContentAlignment="Center"
+                                        VerticalContentAlignment="Center"
+                        Width="18"
+                        Height="18"
+                        Padding="0"
+                        Margin="2,0,2,0"
+                        Click="CloseTab_Click"
+                                        
+                        Tag="{Binding}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+
+                </ListBox>
+            </ScrollViewer>
+
+            <Button Grid.Column="2"
+            Content="▶"
+            Click="TabsRight_Click"/>
+        </Grid>
+        <StackPanel Grid.Row="1" Orientation="Horizontal">
             <Button Content="Сохранить в файл"
-                Width="150"
+                Width="180"
                 Height="30"
                 Margin="5"
                 Click="Save_Click"
                 FontFamily="Segoe UI, Noto Sans, Arial, Times New Roman"/>
             <Button Content="Загрузить перевод из файла"
-                Width="200"
+                Width="180"
                 Height="30"
                 Margin="5"
                 Click="LoadTranslation_Click"
                 FontFamily="Segoe UI, Noto Sans, Arial, Times New Roman"/>
-            <Button Content="Вернуться на главную"
-                Width="200"
+            <Button Content="Загрузить перевод из буфера"
+                Width="180"
                 Height="30"
                 Margin="5"
-                Click="Return_Click"
+                Click="LoadBufferTranslation_Click"
                  FontFamily="Segoe UI, Noto Sans, Arial, Times New Roman"/>
             <CheckBox Content="Скрыть утверждённые"
-                  Margin="10,0"
+                  Margin="5,0"
                   Checked="FilterChanged"
                   Unchecked="FilterChanged" VerticalAlignment="Center"/>
             <CheckBox Content="Скрыть неизменённые"
-                  Margin="10,0"
+                  Margin="5,0"
                   Checked="FilterChanged"
                   Unchecked="FilterChanged" VerticalAlignment="Center"/>
             <CheckBox Content="Скрыть изменённые"
-                  Margin="10,0"
+                  Margin="5,0"
                   Checked="FilterChanged"
                   Unchecked="FilterChanged" VerticalAlignment="Center"/>
             <TextBox x:Name="SearchBox"
                 Height="30"
-                Width="210"
+                Width="200"
                 TextChanged="SearchBox_TextChanged"
                 VerticalContentAlignment="Center"/>
         </StackPanel>
-        <DataGrid x:Name="Grid" Grid.Row="1"
+        <DataGrid x:Name="Grid" Grid.Row="2"
                   ItemsSource="{Binding }"
                   AutoGenerateColumns="False"
                   CanUserAddRows="False"

@@ -25,8 +25,14 @@
             <Button Width="150"
                     Height="35"
                     HorizontalAlignment="Center"
-                    Content="Выберите файл"
+                    Content="Выберите файл(ы)"
                     Click="OpenFile_Click"
+                    FontFamily="Segoe UI, Noto Sans, Arial, Times New Roman"/>
+            <Button Width="150"
+                    Height="35"
+                    HorizontalAlignment="Center"
+                    Content="Выберите папку"
+                    Click="OpenFolder_Click"
                     FontFamily="Segoe UI, Noto Sans, Arial, Times New Roman"/>
         </StackPanel>
     </Grid>

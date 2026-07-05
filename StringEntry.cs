@@ -3,6 +3,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Windows;
+using System.Xml;
 using System.Xml.Linq;
 
 public class StringEntry : INotifyPropertyChanged
@@ -78,22 +79,70 @@ public class StringEntry : INotifyPropertyChanged
     {
         try
         {
-            using var reader = new StreamReader(fileName, Encoding.GetEncoding(1251));
-            XDocument doc = XDocument.Load(reader);
-            return doc.Root!.Elements("string").Select(x => new StringEntry
-            {
-                Id = x.Attribute("id")?.Value ?? "",
-                RuText = DecodeMultiline(x.Element("rus")?.Value ?? ""),
-                NewRuText = DecodeMultiline(x.Element("rus")?.Value ?? ""),
-                EngText = DecodeMultiline(x.Element("eng")?.Value ?? ""),
-                NewEngText = DecodeMultiline(x.Element("eng")?.Value ?? ""),
-            }).ToList();
+            string xml = File.ReadAllText(fileName, Encoding.GetEncoding(1251));
+            return LoadStringsFromXml(xml);
         }
         catch (Exception ex)
         {
             MessageBox.Show(ex.Message, "Ошибка загрузки XML");
             return new List<StringEntry>();
         }
+    }
+
+    public static List<StringEntry> LoadStringsFromXml(string xml)
+    {
+        try
+        {
+            XDocument doc = XDocument.Parse(xml);
+
+            XElement root = doc.Root!;
+
+            // Если пришел целый XML (<string_table>)
+            if (root.Name == "string_table")
+            {
+                return ParseStrings(root.Elements("string"));
+            }
+
+            // Если пришел набор <string>...</string><string>...</string>
+            if (root.Name == "string")
+            {
+                return ParseStrings(new[] { root });
+            }
+
+            throw new Exception("Неизвестный формат XML.");
+        }
+        catch (XmlException)
+        {
+            // Возможно, в буфере просто несколько <string> подряд.
+            try
+            {
+                string wrapped = $"<string_table>{xml}</string_table>";
+                XDocument doc = XDocument.Parse(wrapped);
+                return ParseStrings(doc.Root!.Elements("string"));
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Ошибка загрузки XML");
+                return new List<StringEntry>();
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message, "Ошибка загрузки XML");
+            return new List<StringEntry>();
+        }
+    }
+
+    private static List<StringEntry> ParseStrings(IEnumerable<XElement> strings)
+    {
+        return strings.Select(x => new StringEntry
+        {
+            Id = x.Attribute("id")?.Value ?? "",
+            RuText = DecodeMultiline(x.Element("rus")?.Value ?? ""),
+            NewRuText = DecodeMultiline(x.Element("rus")?.Value ?? ""),
+            EngText = DecodeMultiline(x.Element("eng")?.Value ?? ""),
+            NewEngText = DecodeMultiline(x.Element("eng")?.Value ?? "")
+        }).ToList();
     }
 
     public static string DecodeMultiline(string text)
