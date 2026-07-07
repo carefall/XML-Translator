@@ -10,7 +10,6 @@ namespace XML_Translator
         public TextEditWindow(string text)
         {
             InitializeComponent();
-
             Editor.Text = text;
             Editor.Focus();
             Editor.CaretIndex = Editor.Text.Length;
